@@ -9,7 +9,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 -- GUI
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "InfJumpControl"
-ResetOnSpawn = false
+screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
 local mainFrame = Instance.new("Frame")
