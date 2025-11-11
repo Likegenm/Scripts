@@ -8,6 +8,7 @@ local player = Players.LocalPlayer
 -- Create GUI
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = player.PlayerGui
+screenGui.ReseOnSpawn = false
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 300, 0, 150)
