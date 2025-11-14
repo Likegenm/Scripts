@@ -1,0 +1,1 @@
+if Player.Name = Likegenm
