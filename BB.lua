@@ -319,9 +319,14 @@ BringGroup:AddToggle("Bring", {
                         for _, loot in pairs(workspace.Loot:GetChildren()) do
                             if loot.Name == selectedLoot and loot:FindFirstChild("Main") then
                                 local targetPos = loot.Main.Position + Vector3.new(0, 5, 0)
-                                humanoidRootPart.Position = targetPos
+                                local tweenService = game:GetService("TweenService")
+                                local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                                local tween = tweenService:Create(humanoidRootPart, tweenInfo, {
+                                    CFrame = CFrame.new(targetPos, loot.Main.Position)
+                                })
+                                tween:Play()
                                 
-                                wait(0.1)
+                                wait(0.6)
                                 keypress(0x46)
                                 keyrelease(0x46)
                                 
@@ -331,7 +336,8 @@ BringGroup:AddToggle("Bring", {
                                         if attributes:FindFirstChild("ExtraDetails") then
                                             local details = attributes.ExtraDetails.Value
                                             if string.find(details, "8/8") then
-                                                humanoidRootPart.Position = Vector3.new(133.97, 5, 896.53)
+                                                local safeZonePos = Vector3.new(133.97, 5, 896.53)
+                                                humanoidRootPart.CFrame = CFrame.new(safeZonePos)
                                                 
                                                 for i = 1, 8 do
                                                     keypress(0x46)
@@ -339,7 +345,7 @@ BringGroup:AddToggle("Bring", {
                                                     wait(0.1)
                                                 end
                                                 
-                                                humanoidRootPart.Position = Vector3.new(133.97, -15, 896.53)
+                                                humanoidRootPart.CFrame = CFrame.new(133.97, -15, 896.53)
                                                 return true
                                             end
                                         end
