@@ -164,7 +164,7 @@ SafeZoneGroup:AddButton("Go to SafeZone", function()
             safeZonePlatform.Name = "SafeZonePlatform"
             safeZonePlatform.Anchored = true
             safeZonePlatform.CanCollide = true
-            safeZonePlatform.Transparency = 0.5
+            safeZonePlatform.Transparency = 0
             safeZonePlatform.Size = Vector3.new(20, 1, 20)
             safeZonePlatform.Material = Enum.Material.Neon
             safeZonePlatform.BrickColor = BrickColor.new("Bright green")
