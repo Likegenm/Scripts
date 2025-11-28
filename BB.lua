@@ -175,3 +175,55 @@ FloatPlatformGroup:AddSlider("FloatHeight", {
     end
 })
 
+local SafeZoneGroup = Tabs.LocalPlayer:AddRightGroupbox("SafeZone")
+
+local safeZonePlatform
+local isInSafeZone = false
+
+SafeZoneGroup:AddButton("Go to SafeZone", function()
+    local character = game.Players.LocalPlayer.Character
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            -- Телепортировать игрока
+            humanoidRootPart.CFrame = CFrame.new(133.97, -510, 896.53)
+            
+            -- Создать платформу
+            if safeZonePlatform then
+                safeZonePlatform:Destroy()
+            end
+            
+            safeZonePlatform = Instance.new("Part")
+            safeZonePlatform.Name = "SafeZonePlatform"
+            safeZonePlatform.Anchored = true
+            safeZonePlatform.CanCollide = true
+            safeZonePlatform.Transparency = 0.5
+            safeZonePlatform.Size = Vector3.new(20, 1, 20)
+            safeZonePlatform.Material = Enum.Material.Neon
+            safeZonePlatform.BrickColor = BrickColor.new("Bright green")
+            safeZonePlatform.Position = Vector3.new(133.97, -515, 896.53)
+            safeZonePlatform.Parent = workspace
+            
+            isInSafeZone = true
+        end
+    end
+end)
+
+SafeZoneGroup:AddButton("Return Back", function()
+    local character = game.Players.LocalPlayer.Character
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            -- Телепортировать игрока обратно
+            humanoidRootPart.CFrame = CFrame.new(133.97, -15.00, 896.53)
+            
+            -- Удалить платформу
+            if safeZonePlatform then
+                safeZonePlatform:Destroy()
+                safeZonePlatform = nil
+            end
+            
+            isInSafeZone = false
+        end
+    end
+end)
