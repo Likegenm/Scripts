@@ -263,3 +263,36 @@ TeleportsGroup:AddToggle("Teleport", {
         end
     end
 })
+
+local floatEnabled = false
+local floatConnection
+
+AbilitiesGroup:AddToggle("Float", {
+    Text = "Float",
+    Default = false,
+    Callback = function(Value)
+        floatEnabled = Value
+        if floatEnabled then
+            floatConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                if floatEnabled and game.Players.LocalPlayer.Character then
+                    local character = game.Players.LocalPlayer.Character
+                    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                    if humanoidRootPart then
+                        local currentY = humanoidRootPart.Position.Y
+                        if currentY < humanoidRootPart.Position.Y then
+                            humanoidRootPart.Position = Vector3.new(
+                                humanoidRootPart.Position.X,
+                                humanoidRootPart.Position.Y,
+                                humanoidRootPart.Position.Z
+                            )
+                        end
+                    end
+                end
+            end)
+        else
+            if floatConnection then
+                floatConnection:Disconnect()
+            end
+        end
+    end
+})
