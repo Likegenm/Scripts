@@ -250,11 +250,13 @@ TeleportsGroup:AddToggle("Teleport", {
             if character then
                 local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
                 if humanoidRootPart then
-                    local currentPos = humanoidRootPart.Position
-                    local targetPos = currentPos + Vector3.new(offsetX, offsetY, offsetZ)
+                    local currentCFrame = humanoidRootPart.CFrame
+                    local targetPosition = currentCFrame.Position + Vector3.new(offsetX, offsetY, offsetZ)
                     local tweenService = game:GetService("TweenService")
                     local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                    local tween = tweenService:Create(humanoidRootPart, tweenInfo, {Position = targetPos})
+                    local tween = tweenService:Create(humanoidRootPart, tweenInfo, {
+                        CFrame = CFrame.new(targetPosition, currentCFrame.LookVector * 10000)
+                    })
                     tween:Play()
                 end
             end
