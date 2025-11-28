@@ -196,7 +196,7 @@ SafeZoneGroup:AddButton("Return Back", function()
         end
     end
 end)
-
+)}
 local TeleportsGroup = Tabs.LocalPlayer:AddRightGroupbox("Teleports")
 
 local teleportEnabled = false
@@ -252,7 +252,10 @@ TeleportsGroup:AddToggle("Teleport", {
                 if humanoidRootPart then
                     local currentPos = humanoidRootPart.Position
                     local targetPos = currentPos + Vector3.new(offsetX, offsetY, offsetZ)
-                    humanoidRootPart.Position = targetPos
+                    local tweenService = game:GetService("TweenService")
+                    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                    local tween = tweenService:Create(humanoidRootPart, tweenInfo, {Position = targetPos})
+                    tween:Play()
                 end
             end
         end
