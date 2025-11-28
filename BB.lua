@@ -264,72 +264,97 @@ TeleportsGroup:AddToggle("Teleport", {
     end
 })
 
-local CombatTab = Window:AddTab("Combat", "sword")
-local CombatGroup = CombatTab:AddLeftGroupbox("Combat")
+local BringTab = Window:AddTab("Bring", "users")
+local BringGroup = BringTab:AddLeftGroupbox("Bring Items")
 
-local noCooldownEnabled = false
-local noCooldownConnection
+local lootItems = {}
+local selectedLoot = ""
+local bringEnabled = false
+local bringConnection
 
-CombatGroup:AddToggle("NoCooldown", {
-    Text = "NoCooldown",
-    Default = false,
-    Callback = function(Value)
-        noCooldownEnabled = Value
-        if noCooldownEnabled then
-            noCooldownConnection = game:GetService("RunService").Heartbeat:Connect(function()
-                if noCooldownEnabled then
-                    local backpack = game.Players.LocalPlayer.Backpack
-                    for _, item in pairs(backpack:GetChildren()) do
-                        if item:FindFirstChild("Attributes") then
-                            local attributes = item:FindFirstChild("Attributes")
-                            if attributes:FindFirstChild("Cooldown") then
-                                attributes.Cooldown.Value = 0
-                            end
-                        end
-                    end
-                end
-            end)
-        else
-            if noCooldownConnection then
-                noCooldownConnection:Disconnect()
+local function updateLootList()
+    lootItems = {}
+    if workspace:FindFirstChild("Loot") then
+        for _, item in pairs(workspace.Loot:GetChildren()) do
+            if not table.find(lootItems, item.Name) then
+                table.insert(lootItems, item.Name)
             end
         end
     end
+end
+
+updateLootList()
+
+local lootDropdown = BringGroup:AddDropdown("LootSelect", {
+    Values = lootItems,
+    Default = 1,
+    Text = "Select Loot",
+    Callback = function(Value)
+        selectedLoot = Value
+    end
 })
 
-local killauraEnabled = false
-local killauraConnection
-
-CombatGroup:AddToggle("Killaura", {
-    Text = "Killaura",
+BringGroup:AddToggle("Bring", {
+    Text = "Bring Items",
     Default = false,
     Callback = function(Value)
-        killauraEnabled = Value
-        if killauraEnabled then
-            killauraConnection = game:GetService("RunService").Heartbeat:Connect(function()
-                if killauraEnabled then
+        bringEnabled = Value
+        if bringEnabled then
+            bringConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                if bringEnabled then
                     local character = game.Players.LocalPlayer.Character
                     if character then
-                        local tool = character:FindFirstChildOfClass("Tool")
-                        if tool and tool:FindFirstChild("Attributes") then
-                            local attributes = tool:FindFirstChild("Attributes")
-                            if attributes:FindFirstChild("tooltype") then
-                                local toolType = string.lower(tostring(attributes.tooltype.Value))
-                                if string.find(toolType, "melee") then
-                                    local closestNPC = nil
-                                    local closestDistance = 20
-                                    for _, npc in pairs(workspace.NPCs:GetChildren()) do
-                                        if npc:FindFirstChild("HumanoidRootPart") then
-                                            local distance = (character.HumanoidRootPart.Position - npc.HumanoidRootPart.Position).Magnitude
-                                            if distance < closestDistance then
-                                                closestNPC = npc
-                                                closestDistance = distance
+                        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                        local backpack = game.Players.LocalPlayer.Backpack
+                        
+                        local basicSack = backpack:FindFirstChild("Basic Sack") or character:FindFirstChild("Basic Sack")
+                        if not basicSack then
+                            return
+                        end
+                        
+                        if basicSack.Parent == backpack then
+                            basicSack.Parent = character
+                        end
+                        
+                        for _, loot in pairs(workspace.Loot:GetChildren()) do
+                            if loot.Name == selectedLoot and loot:FindFirstChild("Main") then
+                                local targetPos = loot.Main.Position + Vector3.new(0, 5, 0)
+                                local tweenService = game:GetService("TweenService")
+                                local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                                local tween = tweenService:Create(humanoidRootPart, tweenInfo, {
+                                    CFrame = CFrame.new(targetPos, loot.Main.Position)
+                                })
+                                tween:Play()
+                                
+                                wait(0.5)
+                                keypress(0x46)
+                                keyrelease(0x46)
+                                
+                                local function checkSack()
+                                    if basicSack:FindFirstChild("Attributes") then
+                                        local attributes = basicSack:FindFirstChild("Attributes")
+                                        if attributes:FindFirstChild("ExtraDetails") then
+                                            local details = attributes.ExtraDetails.Value
+                                            if string.find(details, "8/8") then
+                                                local safeZonePos = Vector3.new(133.97, 5, 896.53)
+                                                humanoidRootPart.CFrame = CFrame.new(safeZonePos)
+                                                
+                                                for i = 1, 8 do
+                                                    keypress(0x46)
+                                                    keyrelease(0x46)
+                                                    wait(0.1)
+                                                end
+                                                
+                                                humanoidRootPart.CFrame = CFrame.new(133.97, -15, 896.53)
+                                                return true
                                             end
                                         end
                                     end
-                                    if closestNPC then
-                                        mouse1click()
-                                    end
+                                    return false
+                                end
+                                
+                                while bringEnabled and not checkSack() do
+                                    wait(0.01)
                                 end
                             end
                         end
@@ -337,9 +362,14 @@ CombatGroup:AddToggle("Killaura", {
                 end
             end)
         else
-            if killauraConnection then
-                killauraConnection:Disconnect()
+            if bringConnection then
+                bringConnection:Disconnect()
             end
         end
     end
 })
+
+game:GetService("RunService").Heartbeat:Connect(function()
+    updateLootList()
+    lootDropdown:Refresh(lootItems, true)
+end)
