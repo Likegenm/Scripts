@@ -140,41 +140,6 @@ AbilitiesGroup:AddToggle("Fly", {
     end
 })
 
-local FloatPlatformGroup = Tabs.LocalPlayer:AddRightGroupbox("FloatPlatform")
-
-local floatPlatformEnabled = false
-local currentTween
-local floatHeight = 5
-local originalCFrame
-
-FloatPlatformGroup:AddSlider("FloatHeight", {
-    Text = "Lift Height",
-    Default = 5,
-    Min = 1,
-    Max = 50,
-    Rounding = 0,
-    Suffix = " studs",
-    Callback = function(Value)
-        floatHeight = Value
-        if floatPlatformEnabled then
-            local character = game.Players.LocalPlayer.Character
-            if character then
-                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-                if humanoidRootPart then
-                    if currentTween then
-                        currentTween:Cancel()
-                    end
-                    local targetPosition = originalCFrame.Position + Vector3.new(0, floatHeight, 0)
-                    local tweenService = game:GetService("TweenService")
-                    local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                    currentTween = tweenService:Create(humanoidRootPart, tweenInfo, {Position = targetPosition})
-                    currentTween:Play()
-                end
-            end
-        end
-    end
-})
-
 local SafeZoneGroup = Tabs.LocalPlayer:AddRightGroupbox("SafeZone")
 
 local safeZonePlatform
@@ -185,8 +150,12 @@ SafeZoneGroup:AddButton("Go to SafeZone", function()
     if character then
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
         if humanoidRootPart then
-            -- Телепортировать игрока
-            humanoidRootPart.CFrame = CFrame.new(133.97, -510, 896.53)
+            -- Телепортировать игрока через твин
+            local targetCFrame = CFrame.new(133.97, -510, 896.53)
+            local tweenService = game:GetService("TweenService")
+            local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+            tween:Play()
             
             -- Создать платформу
             if safeZonePlatform then
@@ -214,8 +183,12 @@ SafeZoneGroup:AddButton("Return Back", function()
     if character then
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
         if humanoidRootPart then
-            -- Телепортировать игрока обратно
-            humanoidRootPart.CFrame = CFrame.new(133.97, -15.00, 896.53)
+            -- Телепортировать игрока обратно через твин
+            local targetCFrame = CFrame.new(133.97, -15.00, 896.53)
+            local tweenService = game:GetService("TweenService")
+            local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+            tween:Play()
             
             -- Удалить платформу
             if safeZonePlatform then
