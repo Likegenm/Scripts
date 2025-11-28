@@ -263,3 +263,6 @@ TeleportsGroup:AddToggle("Teleport", {
         end
     end
 })
+
+local CombatTab = Window:AddTab("Combat", "sword")
+local CombatGroup = CombatTab:AddLeftGroupbox("Combat")
