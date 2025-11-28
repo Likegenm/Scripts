@@ -168,7 +168,7 @@ SafeZoneGroup:AddButton("Go to SafeZone", function()
             safeZonePlatform.Size = Vector3.new(20, 1, 20)
             safeZonePlatform.Material = Enum.Material.Neon
             safeZonePlatform.BrickColor = BrickColor.new("Bright green")
-            safeZonePlatform.Position = Vector3.new(133.97, -300, 896.53)
+            safeZonePlatform.Position = Vector3.new(133.97, -215, 896.53)
             safeZonePlatform.Parent = workspace
             
             isInSafeZone = true
