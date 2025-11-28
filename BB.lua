@@ -196,3 +196,65 @@ SafeZoneGroup:AddButton("Return Back", function()
         end
     end
 end)
+
+local TeleportsGroup = Tabs.LocalPlayer:AddRightGroupbox("Teleports")
+
+local teleportEnabled = false
+local offsetX = 0
+local offsetY = 0
+local offsetZ = 0
+
+TeleportsGroup:AddSlider("OffsetX", {
+    Text = "Offset X",
+    Default = 0,
+    Min = -100,
+    Max = 100,
+    Rounding = 0,
+    Suffix = " studs",
+    Callback = function(Value)
+        offsetX = Value
+    end
+})
+
+TeleportsGroup:AddSlider("OffsetY", {
+    Text = "Offset Y", 
+    Default = 0,
+    Min = -100,
+    Max = 100,
+    Rounding = 0,
+    Suffix = " studs",
+    Callback = function(Value)
+        offsetY = Value
+    end
+})
+
+TeleportsGroup:AddSlider("OffsetZ", {
+    Text = "Offset Z",
+    Default = 0,
+    Min = -100,
+    Max = 100,
+    Rounding = 0,
+    Suffix = " studs",
+    Callback = function(Value)
+        offsetZ = Value
+    end
+})
+
+TeleportsGroup:AddToggle("Teleport", {
+    Text = "Apply Teleport",
+    Default = false,
+    Callback = function(Value)
+        teleportEnabled = Value
+        if teleportEnabled then
+            local character = game.Players.LocalPlayer.Character
+            if character then
+                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                if humanoidRootPart then
+                    local currentPos = humanoidRootPart.Position
+                    local targetPos = currentPos + Vector3.new(offsetX, offsetY, offsetZ)
+                    humanoidRootPart.Position = targetPos
+                end
+            end
+        end
+    end
+})
