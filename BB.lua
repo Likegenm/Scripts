@@ -144,41 +144,34 @@ local FloatPlatformGroup = Tabs.LocalPlayer:AddRightGroupbox("FloatPlatform")
 
 local floatPlatformEnabled = false
 local currentTween
-local floatHeight = 0
+local floatHeight = 5
+local originalCFrame
 
 FloatPlatformGroup:AddSlider("FloatHeight", {
-    Text = "Float Height",
-    Default = 0,
+    Text = "Lift Height",
+    Default = 5,
     Min = 1,
     Max = 50,
     Rounding = 0,
     Suffix = " studs",
     Callback = function(Value)
         floatHeight = Value
-    end
-})
-
-FloatPlatformGroup:AddToggle("FloatPlatform", {
-    Text = "Float Platform",
-    Default = false,
-    Callback = function(Value)
-        floatPlatformEnabled = Value
-        local character = game.Players.LocalPlayer.Character
-        if character then
-            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-            if humanoidRootPart then
-                if floatPlatformEnabled then
-                    local targetPosition = humanoidRootPart.Position + Vector3.new(0, floatHeight, 0)
-                    local tweenService = game:GetService("TweenService")
-                    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                    currentTween = tweenService:Create(humanoidRootPart, tweenInfo, {Position = targetPosition})
-                    currentTween:Play()
-                else
+        if floatPlatformEnabled then
+            local character = game.Players.LocalPlayer.Character
+            if character then
+                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                if humanoidRootPart then
                     if currentTween then
                         currentTween:Cancel()
                     end
+                    local targetPosition = originalCFrame.Position + Vector3.new(0, floatHeight, 0)
+                    local tweenService = game:GetService("TweenService")
+                    local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                    currentTween = tweenService:Create(humanoidRootPart, tweenInfo, {Position = targetPosition})
+                    currentTween:Play()
                 end
             end
         end
     end
 })
+
