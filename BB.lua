@@ -266,3 +266,80 @@ TeleportsGroup:AddToggle("Teleport", {
 
 local CombatTab = Window:AddTab("Combat", "sword")
 local CombatGroup = CombatTab:AddLeftGroupbox("Combat")
+
+local noCooldownEnabled = false
+local noCooldownConnection
+
+CombatGroup:AddToggle("NoCooldown", {
+    Text = "NoCooldown",
+    Default = false,
+    Callback = function(Value)
+        noCooldownEnabled = Value
+        if noCooldownEnabled then
+            noCooldownConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                if noCooldownEnabled then
+                    local backpack = game.Players.LocalPlayer.Backpack
+                    for _, item in pairs(backpack:GetChildren()) do
+                        if item:FindFirstChild("Attributes") then
+                            local attributes = item:FindFirstChild("Attributes")
+                            if attributes:FindFirstChild("Cooldown") then
+                                attributes.Cooldown.Value = 0
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            if noCooldownConnection then
+                noCooldownConnection:Disconnect()
+            end
+        end
+    end
+})
+
+local killauraEnabled = false
+local killauraConnection
+
+CombatGroup:AddToggle("Killaura", {
+    Text = "Killaura",
+    Default = false,
+    Callback = function(Value)
+        killauraEnabled = Value
+        if killauraEnabled then
+            killauraConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                if killauraEnabled then
+                    local character = game.Players.LocalPlayer.Character
+                    if character then
+                        local tool = character:FindFirstChildOfClass("Tool")
+                        if tool and tool:FindFirstChild("Attributes") then
+                            local attributes = tool:FindFirstChild("Attributes")
+                            if attributes:FindFirstChild("tooltype") then
+                                local toolType = string.lower(tostring(attributes.tooltype.Value))
+                                if string.find(toolType, "melee") then
+                                    local closestNPC = nil
+                                    local closestDistance = 20
+                                    for _, npc in pairs(workspace.NPCs:GetChildren()) do
+                                        if npc:FindFirstChild("HumanoidRootPart") then
+                                            local distance = (character.HumanoidRootPart.Position - npc.HumanoidRootPart.Position).Magnitude
+                                            if distance < closestDistance then
+                                                closestNPC = npc
+                                                closestDistance = distance
+                                            end
+                                        end
+                                    end
+                                    if closestNPC then
+                                        mouse1click()
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            if killauraConnection then
+                killauraConnection:Disconnect()
+            end
+        end
+    end
+})
