@@ -196,7 +196,7 @@ SafeZoneGroup:AddButton("Return Back", function()
         end
     end
 end)
-)}
+
 local TeleportsGroup = Tabs.LocalPlayer:AddRightGroupbox("Teleports")
 
 local teleportEnabled = false
