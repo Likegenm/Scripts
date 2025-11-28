@@ -266,32 +266,39 @@ TeleportsGroup:AddToggle("Teleport", {
 
 local floatEnabled = false
 local floatConnection
+local originalY = 0
 
 AbilitiesGroup:AddToggle("Float", {
     Text = "Float",
     Default = false,
     Callback = function(Value)
         floatEnabled = Value
-        if floatEnabled then
-            floatConnection = game:GetService("RunService").Heartbeat:Connect(function()
-                if floatEnabled and game.Players.LocalPlayer.Character then
-                    local character = game.Players.LocalPlayer.Character
-                    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-                    if humanoidRootPart then
-                        local currentY = humanoidRootPart.Position.Y
-                        if currentY < humanoidRootPart.Position.Y then
-                            humanoidRootPart.Position = Vector3.new(
-                                humanoidRootPart.Position.X,
-                                humanoidRootPart.Position.Y,
-                                humanoidRootPart.Position.Z
-                            )
+        local character = game.Players.LocalPlayer.Character
+        if character then
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                if floatEnabled then
+                    originalY = humanoidRootPart.Position.Y
+                    floatConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                        if floatEnabled and humanoidRootPart then
+                            local currentPos = humanoidRootPart.Position
+                            if currentPos.Y < originalY then
+                                local tweenService = game:GetService("TweenService")
+                                local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                                local tween = tweenService:Create(humanoidRootPart, tweenInfo, {
+                                    Position = Vector3.new(currentPos.X, originalY, currentPos.Z)
+                                })
+                                tween:Play()
+                            else
+                                originalY = currentPos.Y
+                            end
                         end
+                    end)
+                else
+                    if floatConnection then
+                        floatConnection:Disconnect()
                     end
                 end
-            end)
-        else
-            if floatConnection then
-                floatConnection:Disconnect()
             end
         end
     end
