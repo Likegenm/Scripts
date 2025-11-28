@@ -150,14 +150,12 @@ SafeZoneGroup:AddButton("Go to SafeZone", function()
     if character then
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
         if humanoidRootPart then
-            -- Телепортировать игрока через твин
-            local targetCFrame = CFrame.new(133.97, -510, 896.53)
+            local targetCFrame = CFrame.new(133.97, -210, 896.53)
             local tweenService = game:GetService("TweenService")
             local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
             local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
             tween:Play()
             
-            -- Создать платформу
             if safeZonePlatform then
                 safeZonePlatform:Destroy()
             end
@@ -170,7 +168,7 @@ SafeZoneGroup:AddButton("Go to SafeZone", function()
             safeZonePlatform.Size = Vector3.new(20, 1, 20)
             safeZonePlatform.Material = Enum.Material.Neon
             safeZonePlatform.BrickColor = BrickColor.new("Bright green")
-            safeZonePlatform.Position = Vector3.new(133.97, -515, 896.53)
+            safeZonePlatform.Position = Vector3.new(133.97, -215, 896.53)
             safeZonePlatform.Parent = workspace
             
             isInSafeZone = true
@@ -183,14 +181,12 @@ SafeZoneGroup:AddButton("Return Back", function()
     if character then
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
         if humanoidRootPart then
-            -- Телепортировать игрока обратно через твин
             local targetCFrame = CFrame.new(133.97, -15.00, 896.53)
             local tweenService = game:GetService("TweenService")
             local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
             local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
             tween:Play()
             
-            -- Удалить платформу
             if safeZonePlatform then
                 safeZonePlatform:Destroy()
                 safeZonePlatform = nil
