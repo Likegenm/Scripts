@@ -62,12 +62,6 @@ local FlyToggle = MainTab:AddToggle({
         local character = player.Character or player.CharacterAdded:Wait()
         
         if Value then
-            local bodyVelocity = Instance.new("BodyVelocity")
-            bodyVelocity.Name = "FlyVelocity"
-            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-            bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
-            bodyVelocity.Parent = character.HumanoidRootPart
-            
             local flyConnection
             flyConnection = game:GetService("RunService").Heartbeat:Connect(function()
                 if not FlyToggle.Value then
@@ -76,28 +70,44 @@ local FlyToggle = MainTab:AddToggle({
                 end
                 
                 local hrp = character.HumanoidRootPart
-                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-                bodyVelocity.MaxForce = Vector3.new(40000, 40000, 40000)
-                
+                local tweenService = game:GetService("TweenService")
                 local flySpeed = currentSpeed
                 
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
-                    bodyVelocity.Velocity = hrp.CFrame.LookVector * flySpeed
+                    local goal = {}
+                    goal.Position = hrp.Position + hrp.CFrame.LookVector * (flySpeed / 10)
+                    local tween = tweenService:Create(hrp, TweenInfo.new(0.1), goal)
+                    tween:Play()
                 end
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
-                    bodyVelocity.Velocity = -hrp.CFrame.LookVector * flySpeed
+                    local goal = {}
+                    goal.Position = hrp.Position - hrp.CFrame.LookVector * (flySpeed / 10)
+                    local tween = tweenService:Create(hrp, TweenInfo.new(0.1), goal)
+                    tween:Play()
                 end
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
-                    bodyVelocity.Velocity = -hrp.CFrame.RightVector * flySpeed
+                    local goal = {}
+                    goal.Position = hrp.Position - hrp.CFrame.RightVector * (flySpeed / 10)
+                    local tween = tweenService:Create(hrp, TweenInfo.new(0.1), goal)
+                    tween:Play()
                 end
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
-                    bodyVelocity.Velocity = hrp.CFrame.RightVector * flySpeed
+                    local goal = {}
+                    goal.Position = hrp.Position + hrp.CFrame.RightVector * (flySpeed / 10)
+                    local tween = tweenService:Create(hrp, TweenInfo.new(0.1), goal)
+                    tween:Play()
                 end
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
-                    bodyVelocity.Velocity = Vector3.new(bodyVelocity.Velocity.X, flySpeed, bodyVelocity.Velocity.Z)
+                    local goal = {}
+                    goal.Position = hrp.Position + Vector3.new(0, flySpeed / 10, 0)
+                    local tween = tweenService:Create(hrp, TweenInfo.new(0.1), goal)
+                    tween:Play()
                 end
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftShift) then
-                    bodyVelocity.Velocity = Vector3.new(bodyVelocity.Velocity.X, -flySpeed, bodyVelocity.Velocity.Z)
+                    local goal = {}
+                    goal.Position = hrp.Position - Vector3.new(0, flySpeed / 10, 0)
+                    local tween = tweenService:Create(hrp, TweenInfo.new(0.1), goal)
+                    tween:Play()
                 end
             end)
             
@@ -108,9 +118,6 @@ local FlyToggle = MainTab:AddToggle({
                 Time = 5
             })
         else
-            if character.HumanoidRootPart:FindFirstChild("FlyVelocity") then
-                character.HumanoidRootPart.FlyVelocity:Destroy()
-            end
             OrionLib:MakeNotification({
                 Name = "Fly",
                 Content = "Fly выключен!",
