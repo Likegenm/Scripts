@@ -35,4 +35,72 @@ local SpeedSlider = MainTab:AddSlider({
     end    
 })
 
+local FlyToggle = MainTab:AddToggle({
+    Name = "Fly",
+    Default = false,
+    Save = true,
+    Flag = "Fly",
+    Callback = function(Value)
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
+        
+        if Value then
+            local bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.Name = "FlyVelocity"
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
+            bodyVelocity.Parent = character.HumanoidRootPart
+            
+            local flyConnection
+            flyConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                if not FlyToggle.Value then
+                    flyConnection:Disconnect()
+                    return
+                end
+                
+                local hrp = character.HumanoidRootPart
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                bodyVelocity.MaxForce = Vector3.new(40000, 40000, 40000)
+                
+                if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
+                    bodyVelocity.Velocity = hrp.CFrame.LookVector * 50
+                end
+                if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
+                    bodyVelocity.Velocity = -hrp.CFrame.LookVector * 50
+                end
+                if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
+                    bodyVelocity.Velocity = -hrp.CFrame.RightVector * 50
+                end
+                if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
+                    bodyVelocity.Velocity = hrp.CFrame.RightVector * 50
+                end
+                if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
+                    bodyVelocity.Velocity = Vector3.new(0, 50, 0)
+                end
+                if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftShift) then
+                    bodyVelocity.Velocity = Vector3.new(0, -50, 0)
+                end
+            end)
+            
+            OrionLib:MakeNotification({
+                Name = "Fly",
+                Content = "Fly включен! Используйте WASD, Space и Shift",
+                Image = "rbxassetid://4483345998",
+                Time = 5
+            })
+        else
+            if character.HumanoidRootPart:FindFirstChild("FlyVelocity") then
+                character.HumanoidRootPart.FlyVelocity:Destroy()
+            end
+            OrionLib:MakeNotification({
+                Name = "Fly",
+                Content = "Fly выключен!",
+                Image = "rbxassetid://4483345998",
+                Time = 3
+            })
+        end
+    end    
+})
+
 OrionLib:Init()
