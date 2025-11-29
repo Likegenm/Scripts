@@ -359,37 +359,6 @@ if lootFolder then
 end
 
 local VisualTab = Window:AddTab("Visual", "eye")
-local VisualGroup = VisualTab:AddLeftGroupbox("Visual Effects")
-
-VisualGroup:AddButton("Full Bright", function()
-    game.Lighting.Brightness = 10
-    game.Lighting.GlobalShadows = false
-    game.Lighting.ClockTime = 14
-end)
-
-VisualGroup:AddButton("Reset Lighting", function()
-    game.Lighting.Brightness = 1
-    game.Lighting.GlobalShadows = true
-    game.Lighting.ClockTime = 14
-end)
-
-VisualGroup:AddColorPicker("AmbientColor", {
-    Default = Color3.new(1, 1, 1),
-    Title = "Ambient Color",
-    Callback = function(Value)
-        game.Lighting.Ambient = Value
-    end
-})
-
-VisualGroup:AddColorPicker("OutdoorAmbient", {
-    Default = Color3.new(0.5, 0.5, 0.5),
-    Title = "Outdoor Ambient",
-    Callback = function(Value)
-        game.Lighting.OutdoorAmbient = Value
-    end
-})
-
-local VisualTab = Window:AddTab("Visual", "eye")
 
 local EspGroup = VisualTab:AddLeftGroupbox("ESP")
 local AmbientGroup = VisualTab:AddRightGroupbox("Ambient")
