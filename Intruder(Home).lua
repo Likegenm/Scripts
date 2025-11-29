@@ -70,44 +70,31 @@ local FlyToggle = MainTab:AddToggle({
                 end
                 
                 local hrp = character.HumanoidRootPart
-                local tweenService = game:GetService("TweenService")
                 local flySpeed = currentSpeed
+                local moveDirection = Vector3.new(0, 0, 0)
                 
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
-                    local goal = {}
-                    goal.Position = hrp.Position + hrp.CFrame.LookVector * (flySpeed / 10)
-                    local tween = tweenService:Create(hrp, TweenInfo.new(0.1), goal)
-                    tween:Play()
+                    moveDirection = moveDirection + hrp.CFrame.LookVector
                 end
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
-                    local goal = {}
-                    goal.Position = hrp.Position - hrp.CFrame.LookVector * (flySpeed / 10)
-                    local tween = tweenService:Create(hrp, TweenInfo.new(0.1), goal)
-                    tween:Play()
+                    moveDirection = moveDirection - hrp.CFrame.LookVector
                 end
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
-                    local goal = {}
-                    goal.Position = hrp.Position - hrp.CFrame.RightVector * (flySpeed / 10)
-                    local tween = tweenService:Create(hrp, TweenInfo.new(0.1), goal)
-                    tween:Play()
+                    moveDirection = moveDirection - hrp.CFrame.RightVector
                 end
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
-                    local goal = {}
-                    goal.Position = hrp.Position + hrp.CFrame.RightVector * (flySpeed / 10)
-                    local tween = tweenService:Create(hrp, TweenInfo.new(0.1), goal)
-                    tween:Play()
+                    moveDirection = moveDirection + hrp.CFrame.RightVector
                 end
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
-                    local goal = {}
-                    goal.Position = hrp.Position + Vector3.new(0, flySpeed / 10, 0)
-                    local tween = tweenService:Create(hrp, TweenInfo.new(0.1), goal)
-                    tween:Play()
+                    moveDirection = moveDirection + Vector3.new(0, 1, 0)
                 end
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftShift) then
-                    local goal = {}
-                    goal.Position = hrp.Position - Vector3.new(0, flySpeed / 10, 0)
-                    local tween = tweenService:Create(hrp, TweenInfo.new(0.1), goal)
-                    tween:Play()
+                    moveDirection = moveDirection + Vector3.new(0, -1, 0)
+                end
+                
+                if moveDirection.Magnitude > 0 then
+                    moveDirection = moveDirection.Unit * flySpeed
+                    hrp.CFrame = hrp.CFrame + moveDirection
                 end
             end)
             
@@ -127,5 +114,4 @@ local FlyToggle = MainTab:AddToggle({
         end
     end    
 })
-
 OrionLib:Init()
