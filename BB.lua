@@ -269,7 +269,6 @@ local BringGroup = BringTab:AddLeftGroupbox("Bring Items")
 
 local lootFolder = workspace:FindFirstChild("Loot")
 local lootItems = {}
-local lootDropdown
 
 local function updateLootList()
     lootItems = {}
@@ -284,12 +283,8 @@ local function updateLootList()
     end
 end
 
-local function createDropdown()
-    if lootDropdown then
-        BringGroup:RemoveObject(lootDropdown)
-    end
-    
-    lootDropdown = BringGroup:AddDropdown("LootSelect", {
+local function createNewDropdown()
+    BringGroup:AddDropdown("LootSelect" .. tick(), {
         Values = lootItems,
         Default = 1,
         Text = "Select Loot",
@@ -313,15 +308,9 @@ local function createDropdown()
 end
 
 updateLootList()
-createDropdown()
+createNewDropdown()
 
 BringGroup:AddButton("Refresh Loot List", function()
     updateLootList()
-    createDropdown()
-end)
-
--- Автообновление
-game:GetService("RunService").Heartbeat:Connect(function()
-    updateLootList()
-    createDropdown()
+    createNewDropdown()
 end)
