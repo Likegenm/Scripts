@@ -268,49 +268,92 @@ local BringTab = Window:AddTab("Bring", "users")
 local BringGroup = BringTab:AddLeftGroupbox("Bring Items")
 
 local lootFolder = workspace:FindFirstChild("Loot")
-local lootItems = {}
+local MODELS, OPTIONS = {}, {}
+local SEARCH = ""
 
-local function updateLootList()
-    lootItems = {}
+local function buildSnapshot()
+    MODELS = {}
     if lootFolder then
-        for _, item in pairs(lootFolder:GetChildren()) do
-            if item:IsA("Model") then
-                if not table.find(lootItems, item.Name) then
-                    table.insert(lootItems, item.Name)
-                end
+        for _, obj in ipairs(lootFolder:GetChildren()) do
+            if obj:IsA("Model") then
+                table.insert(MODELS, obj)
+            end
+        end
+        table.sort(MODELS, function(a,b) return a.Name:lower() < b.Name:lower() end)
+    end
+end
+
+local function rebuildOptions()
+    local seen, list = {}, {}
+    for _, m in ipairs(MODELS) do
+        if SEARCH == "" or string.find(m.Name:lower(), SEARCH, 1, true) then
+            if not seen[m.Name] then
+                table.insert(list, m.Name)
+                seen[m.Name] = true
+            end
+        end
+    end
+    OPTIONS = list
+end
+
+local function bringAllByName(itemName)
+    local char = game.Players.LocalPlayer.Character
+    if not char then return end
+    
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not (hrp and lootFolder) then return end
+
+    for _, obj in ipairs(lootFolder:GetChildren()) do
+        if obj:IsA("Model") and obj.Name == itemName then
+            local target = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+            if target then
+                obj:PivotTo(hrp.CFrame + Vector3.new(math.random(-4,4), 2, math.random(-4,4)))
             end
         end
     end
 end
 
-local function createNewDropdown()
-    BringGroup:AddDropdown("LootSelect" .. tick(), {
-        Values = lootItems,
-        Default = 1,
-        Text = "Select Loot",
-        Callback = function(Value)
-            local character = game.Players.LocalPlayer.Character
-            if character then
-                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-                if humanoidRootPart and lootFolder then
-                    for _, obj in pairs(lootFolder:GetChildren()) do
-                        if obj.Name == Value then
-                            local target = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
-                            if target then
-                                obj:PivotTo(humanoidRootPart.CFrame + Vector3.new(math.random(-4,4), 2, math.random(-4,4)))
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    })
-end
+buildSnapshot()
+rebuildOptions()
 
-updateLootList()
-createNewDropdown()
+BringGroup:AddInput("SearchLoot", {
+    Text = "Search Loot",
+    Default = "",
+    Placeholder = "Type to filter...",
+    Callback = function(text)
+        SEARCH = text:lower()
+        rebuildOptions()
+        lootDropdown:SetValues(OPTIONS)
+    end
+})
+
+local lootDropdown = BringGroup:AddDropdown("BringDropdown", {
+    Values = OPTIONS,
+    Default = 1,
+    Text = "Select Item to Bring",
+    Callback = function(Value)
+        bringAllByName(Value)
+    end
+})
 
 BringGroup:AddButton("Refresh Loot List", function()
-    updateLootList()
-    createNewDropdown()
+    buildSnapshot()
+    rebuildOptions()
+    lootDropdown:SetValues(OPTIONS)
 end)
+
+if lootFolder then
+    lootFolder.ChildAdded:Connect(function()
+        task.wait(0.2)
+        buildSnapshot()
+        rebuildOptions()
+        lootDropdown:SetValues(OPTIONS)
+    end)
+    
+    lootFolder.ChildRemoved:Connect(function()
+        task.wait(0.2)
+        buildSnapshot()
+        rebuildOptions()
+        lootDropdown:SetValues(OPTIONS)
+    end)
+end
