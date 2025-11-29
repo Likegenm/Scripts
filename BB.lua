@@ -267,9 +267,6 @@ TeleportsGroup:AddToggle("Teleport", {
 local BringTab = Window:AddTab("Bring", "users")
 local BringGroup = BringTab:AddLeftGroupbox("Bring Items")
 
-local BringTab = Window:AddTab("Bring", "users")
-local BringGroup = BringTab:AddLeftGroupbox("Bring Items")
-
 local lootFolder = workspace:FindFirstChild("Loot")
 local MODELS, OPTIONS = {}, {}
 local SEARCH = ""
