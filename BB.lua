@@ -264,56 +264,56 @@ TeleportsGroup:AddToggle("Teleport", {
     end
 })
 
-local BringTab = Window:AddTab("Bring", "users")
-local BringGroup = BringTab:AddLeftGroupbox("Bring Items")
+local function createBringTab()
+    local BringTab = Window:AddTab("Bring", "users")
+    local BringGroup = BringTab:AddLeftGroupbox("Bring Items")
 
-local lootFolder = workspace:FindFirstChild("Loot")
-local lootItems = {}
+    local lootFolder = workspace:FindFirstChild("Loot")
+    local lootItems = {}
 
-local function updateLootList()
-    lootItems = {}
-    if lootFolder then
-        for _, item in pairs(lootFolder:GetChildren()) do
-            if item:IsA("Model") then
-                if not table.find(lootItems, item.Name) then
-                    table.insert(lootItems, item.Name)
-                end
-            end
-        end
-    end
-end
-
-updateLootList()
-
-local lootDropdown = BringGroup:AddDropdown("LootSelect", {
-    Values = lootItems,
-    Default = 1,
-    Text = "Select Loot",
-    Callback = function(Value)
-        local character = game.Players.LocalPlayer.Character
-        if character then
-            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-            if humanoidRootPart and lootFolder then
-                for _, obj in pairs(lootFolder:GetChildren()) do
-                    if obj.Name == Value then
-                        local target = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
-                        if target then
-                            obj:PivotTo(humanoidRootPart.CFrame + Vector3.new(math.random(-4,4), 2, math.random(-4,4)))
-                        end
+    local function updateLootList()
+        lootItems = {}
+        if lootFolder then
+            for _, item in pairs(lootFolder:GetChildren()) do
+                if item:IsA("Model") then
+                    if not table.find(lootItems, item.Name) then
+                        table.insert(lootItems, item.Name)
                     end
                 end
             end
         end
     end
-})
 
-BringGroup:AddButton("Refresh Loot List", function()
     updateLootList()
-    lootDropdown:Refresh(lootItems, true)
-end)
 
--- Автообновление списка
-game:GetService("RunService").Heartbeat:Connect(function()
-    updateLootList()
-    lootDropdown:Refresh(lootItems, true)
-end)
+    local lootDropdown = BringGroup:AddDropdown("LootSelect", {
+        Values = lootItems,
+        Default = 1,
+        Text = "Select Loot",
+        Callback = function(Value)
+            local character = game.Players.LocalPlayer.Character
+            if character then
+                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                if humanoidRootPart and lootFolder then
+                    for _, obj in pairs(lootFolder:GetChildren()) do
+                        if obj.Name == Value then
+                            local target = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                            if target then
+                                obj:PivotTo(humanoidRootPart.CFrame + Vector3.new(math.random(-4,4), 2, math.random(-4,4)))
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    })
+
+    BringGroup:AddButton("Refresh Loot List", function()
+        Window:RemoveTab(BringTab)
+        createBringTab()
+    end)
+
+    return BringTab
+end
+
+local BringTab = createBringTab()
