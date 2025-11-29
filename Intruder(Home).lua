@@ -26,14 +26,31 @@ local SpeedSlider = MainTab:AddSlider({
     Increment = 1,
     ValueName = "speed",
     Callback = function(Value)
-        local player = game.Players.LocalPlayer
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = player.Character.HumanoidRootPart
-            local moveDirection = hrp.CFrame.LookVector
-            hrp.CFrame = hrp.CFrame + moveDirection * (Value / 10)
-        end
+        local speedValue = Value
     end    
 })
+
+local speedConnection
+local currentSpeed = 16
+
+SpeedSlider:Set(16)
+
+game:GetService("RunService").Heartbeat:Connect(function()
+    local player = game.Players.LocalPlayer
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = player.Character.HumanoidRootPart
+        local humanoid = player.Character:FindFirstChild("Humanoid")
+        
+        if humanoid then
+            local moveDirection = humanoid.MoveDirection
+            hrp.Velocity = Vector3.new(moveDirection.X * currentSpeed, hrp.Velocity.Y, moveDirection.Z * currentSpeed)
+        end
+    end
+end)
+
+SpeedSlider.Callback = function(Value)
+    currentSpeed = Value
+end
 
 local FlyToggle = MainTab:AddToggle({
     Name = "Fly",
