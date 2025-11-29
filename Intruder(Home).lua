@@ -60,7 +60,6 @@ local FlyToggle = MainTab:AddToggle({
     Callback = function(Value)
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:WaitForChild("Humanoid")
         
         if Value then
             local bodyVelocity = Instance.new("BodyVelocity")
@@ -80,23 +79,25 @@ local FlyToggle = MainTab:AddToggle({
                 bodyVelocity.Velocity = Vector3.new(0, 0, 0)
                 bodyVelocity.MaxForce = Vector3.new(40000, 40000, 40000)
                 
+                local flySpeed = currentSpeed
+                
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
-                    bodyVelocity.Velocity = hrp.CFrame.LookVector * 50
+                    bodyVelocity.Velocity = hrp.CFrame.LookVector * flySpeed
                 end
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
-                    bodyVelocity.Velocity = -hrp.CFrame.LookVector * 50
+                    bodyVelocity.Velocity = -hrp.CFrame.LookVector * flySpeed
                 end
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
-                    bodyVelocity.Velocity = -hrp.CFrame.RightVector * 50
+                    bodyVelocity.Velocity = -hrp.CFrame.RightVector * flySpeed
                 end
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
-                    bodyVelocity.Velocity = hrp.CFrame.RightVector * 50
+                    bodyVelocity.Velocity = hrp.CFrame.RightVector * flySpeed
                 end
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
-                    bodyVelocity.Velocity = Vector3.new(0, 50, 0)
+                    bodyVelocity.Velocity = Vector3.new(bodyVelocity.Velocity.X, flySpeed, bodyVelocity.Velocity.Z)
                 end
                 if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftShift) then
-                    bodyVelocity.Velocity = Vector3.new(0, -50, 0)
+                    bodyVelocity.Velocity = Vector3.new(bodyVelocity.Velocity.X, -flySpeed, bodyVelocity.Velocity.Z)
                 end
             end)
             
