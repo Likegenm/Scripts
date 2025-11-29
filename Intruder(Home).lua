@@ -52,66 +52,56 @@ SpeedSlider.Callback = function(Value)
     currentSpeed = Value
 end
 
-local FlyToggle = MainTab:AddToggle({
-    Name = "Fly",
+local NoclipToggle = MainTab:AddToggle({
+    Name = "Noclip",
     Default = false,
     Save = true,
-    Flag = "Fly",
+    Flag = "Noclip",
     Callback = function(Value)
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
         
         if Value then
-            local flyConnection
-            flyConnection = game:GetService("RunService").Heartbeat:Connect(function()
-                if not FlyToggle.Value then
-                    flyConnection:Disconnect()
-                    return
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
                 end
-                
-                local hrp = character.HumanoidRootPart
-                local flySpeed = currentSpeed
-                local moveDirection = Vector3.new(0, 0, 0)
-                
-                if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
-                    moveDirection = moveDirection + hrp.CFrame.LookVector
-                end
-                if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
-                    moveDirection = moveDirection - hrp.CFrame.LookVector
-                end
-                if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
-                    moveDirection = moveDirection - hrp.CFrame.RightVector
-                end
-                if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
-                    moveDirection = moveDirection + hrp.CFrame.RightVector
-                end
-                if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
-                    moveDirection = moveDirection + Vector3.new(0, 1, 0)
-                end
-                if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftShift) then
-                    moveDirection = moveDirection + Vector3.new(0, -1, 0)
-                end
-                
-                if moveDirection.Magnitude > 0 then
-                    moveDirection = moveDirection.Unit * flySpeed
-                    hrp.CFrame = hrp.CFrame + moveDirection
+            end
+            
+            local noclipConnection
+            noclipConnection = character.DescendantAdded:Connect(function(part)
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
                 end
             end)
             
+            NoclipToggle.noclipConnection = noclipConnection
+            
             OrionLib:MakeNotification({
-                Name = "Fly",
-                Content = "Fly включен! Используйте WASD, Space и Shift",
+                Name = "Noclip",
+                Content = "Noclip enabled!",
                 Image = "rbxassetid://4483345998",
-                Time = 5
+                Time = 3
             })
         else
+            if NoclipToggle.noclipConnection then
+                NoclipToggle.noclipConnection:Disconnect()
+            end
+            
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+            
             OrionLib:MakeNotification({
-                Name = "Fly",
-                Content = "Fly выключен!",
+                Name = "Noclip",
+                Content = "Noclip disabled!",
                 Image = "rbxassetid://4483345998",
                 Time = 3
             })
         end
     end    
 })
+
 OrionLib:Init()
