@@ -637,3 +637,20 @@ AmbientGroup:AddButton("First Person", function()
     game.Players.LocalPlayer.CameraMaxZoomDistance = 0
     game.Players.LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
 end)
+
+BringGroup:AddButton("Bring All Items", function()
+    local character = game.Players.LocalPlayer.Character
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart and lootFolder then
+            for _, obj in pairs(lootFolder:GetChildren()) do
+                if obj:IsA("Model") then
+                    local target = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                    if target then
+                        obj:PivotTo(humanoidRootPart.CFrame + Vector3.new(math.random(-4,4), 2, math.random(-4,4)))
+                    end
+                end
+            end
+        end
+    end
+end)
