@@ -264,29 +264,32 @@ TeleportsGroup:AddToggle("Teleport", {
     end
 })
 
-local function createBringTab()
-    local BringTab = Window:AddTab("Bring", "users")
-    local BringGroup = BringTab:AddLeftGroupbox("Bring Items")
+local BringTab = Window:AddTab("Bring", "users")
+local BringGroup = BringTab:AddLeftGroupbox("Bring Items")
 
-    local lootFolder = workspace:FindFirstChild("Loot")
-    local lootItems = {}
+local lootFolder = workspace:FindFirstChild("Loot")
+local lootItems = {}
+local lootDropdown
 
-    local function updateLootList()
-        lootItems = {}
-        if lootFolder then
-            for _, item in pairs(lootFolder:GetChildren()) do
-                if item:IsA("Model") then
-                    if not table.find(lootItems, item.Name) then
-                        table.insert(lootItems, item.Name)
-                    end
+local function updateLootList()
+    lootItems = {}
+    if lootFolder then
+        for _, item in pairs(lootFolder:GetChildren()) do
+            if item:IsA("Model") then
+                if not table.find(lootItems, item.Name) then
+                    table.insert(lootItems, item.Name)
                 end
             end
         end
     end
+end
 
-    updateLootList()
-
-    local lootDropdown = BringGroup:AddDropdown("LootSelect", {
+local function createDropdown()
+    if lootDropdown then
+        BringGroup:RemoveObject(lootDropdown)
+    end
+    
+    lootDropdown = BringGroup:AddDropdown("LootSelect", {
         Values = lootItems,
         Default = 1,
         Text = "Select Loot",
@@ -307,13 +310,18 @@ local function createBringTab()
             end
         end
     })
-
-    BringGroup:AddButton("Refresh Loot List", function()
-        Window:RemoveTab(BringTab)
-        createBringTab()
-    end)
-
-    return BringTab
 end
 
-local BringTab = createBringTab()
+updateLootList()
+createDropdown()
+
+BringGroup:AddButton("Refresh Loot List", function()
+    updateLootList()
+    createDropdown()
+end)
+
+-- Автообновление
+game:GetService("RunService").Heartbeat:Connect(function()
+    updateLootList()
+    createDropdown()
+end)
