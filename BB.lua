@@ -267,103 +267,98 @@ TeleportsGroup:AddToggle("Teleport", {
 local BringTab = Window:AddTab("Bring", "users")
 local BringGroup = BringTab:AddLeftGroupbox("Bring Items")
 
-local lootItems = {}
-local selectedLoot = ""
-local bringEnabled = false
-local bringConnection
+local BringTab = Window:AddTab("Bring", "users")
+local BringGroup = BringTab:AddLeftGroupbox("Bring Items")
 
-local function updateLootList()
-    lootItems = {}
-    if workspace:FindFirstChild("Loot") then
-        for _, item in pairs(workspace.Loot:GetChildren()) do
-            if not table.find(lootItems, item.Name) then
-                table.insert(lootItems, item.Name)
+local lootFolder = workspace:FindFirstChild("Loot")
+local MODELS, OPTIONS = {}, {}
+local SEARCH = ""
+
+local function buildSnapshot()
+    MODELS = {}
+    if lootFolder then
+        for _, obj in ipairs(lootFolder:GetChildren()) do
+            if obj:IsA("Model") then
+                table.insert(MODELS, obj)
+            end
+        end
+        table.sort(MODELS, function(a,b) return a.Name:lower() < b.Name:lower() end)
+    end
+end
+
+local function rebuildOptions()
+    local seen, list = {}, {}
+    for _, m in ipairs(MODELS) do
+        if SEARCH == "" or string.find(m.Name:lower(), SEARCH, 1, true) then
+            if not seen[m.Name] then
+                table.insert(list, m.Name)
+                seen[m.Name] = true
+            end
+        end
+    end
+    OPTIONS = list
+end
+
+local function bringAllByName(itemName)
+    local char = game.Players.LocalPlayer.Character
+    if not char then return end
+    
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not (hrp and lootFolder) then return end
+
+    local count = 0
+    for _, obj in ipairs(lootFolder:GetChildren()) do
+        if obj:IsA("Model") and obj.Name == itemName then
+            local target = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+            if target then
+                obj:PivotTo(hrp.CFrame + Vector3.new(math.random(-4,4), 2, math.random(-4,4)))
+                count = count + 1
             end
         end
     end
 end
 
-updateLootList()
+buildSnapshot()
+rebuildOptions()
 
-local lootDropdown = BringGroup:AddDropdown("LootSelect", {
-    Values = lootItems,
+BringGroup:AddInput("SearchLoot", {
+    Text = "Search Loot",
+    Default = "",
+    Placeholder = "Type to filter...",
+    Callback = function(text)
+        SEARCH = text:lower()
+        rebuildOptions()
+        lootDropdown:Refresh(OPTIONS, true)
+    end
+})
+
+local lootDropdown = BringGroup:AddDropdown("BringDropdown", {
+    Values = OPTIONS,
     Default = 1,
-    Text = "Select Loot",
+    Text = "Select Item to Bring",
     Callback = function(Value)
-        selectedLoot = Value
+        bringAllByName(Value)
     end
 })
 
-BringGroup:AddToggle("Bring", {
-    Text = "Bring Items",
-    Default = false,
-    Callback = function(Value)
-        bringEnabled = Value
-        if bringEnabled then
-            bringConnection = game:GetService("RunService").Heartbeat:Connect(function()
-                if bringEnabled then
-                    local character = game.Players.LocalPlayer.Character
-                    if character then
-                        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-                        local backpack = game.Players.LocalPlayer.Backpack
-                        
-                        local basicSack = backpack:FindFirstChild("Basic Sack") or character:FindFirstChild("Basic Sack")
-                        if not basicSack then
-                            return
-                        end
-                        
-                        if basicSack.Parent == backpack then
-                            basicSack.Parent = character
-                        end
-                        
-                        for _, loot in pairs(workspace.Loot:GetChildren()) do
-                            if loot.Name == selectedLoot and loot:FindFirstChild("Main") then
-                                local targetPos = loot.Main.Position + Vector3.new(0, 5, 0)
-                                humanoidRootPart.CFrame = CFrame.new(targetPos, loot.Main.Position)
-                                
-                                wait(0.1)
-                                keypress(0x46)
-                                keyrelease(0x46)
-                                
-                                local function checkSack()
-                                    if basicSack:FindFirstChild("Attributes") then
-                                        local attributes = basicSack:FindFirstChild("Attributes")
-                                        if attributes:FindFirstChild("ExtraDetails") then
-                                            local details = attributes.ExtraDetails.Value
-                                            if string.find(details, "8/8") then
-                                                humanoidRootPart.CFrame = CFrame.new(133.97, 5, 896.53)
-                                                
-                                                for i = 1, 8 do
-                                                    keypress(0x46)
-                                                    keyrelease(0x46)
-                                                    wait(0.1)
-                                                end
-                                                
-                                                humanoidRootPart.CFrame = CFrame.new(133.97, -15, 896.53)
-                                                return true
-                                            end
-                                        end
-                                    end
-                                    return false
-                                end
-                                
-                                while bringEnabled and not checkSack() do
-                                    wait(0.01)
-                                end
-                            end
-                        end
-                    end
-                end
-            end)
-        else
-            if bringConnection then
-                bringConnection:Disconnect()
-            end
-        end
-    end
-})
-
-game:GetService("RunService").Heartbeat:Connect(function()
-    updateLootList()
-    lootDropdown:Refresh(lootItems, true)
+BringGroup:AddButton("Refresh Loot List", function()
+    buildSnapshot()
+    rebuildOptions()
+    lootDropdown:Refresh(OPTIONS, true)
 end)
+
+if lootFolder then
+    lootFolder.ChildAdded:Connect(function()
+        task.wait(0.2)
+        buildSnapshot()
+        rebuildOptions()
+        lootDropdown:Refresh(OPTIONS, true)
+    end)
+    
+    lootFolder.ChildRemoved:Connect(function()
+        task.wait(0.2)
+        buildSnapshot()
+        rebuildOptions()
+        lootDropdown:Refresh(OPTIONS, true)
+    end)
+end
