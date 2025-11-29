@@ -357,3 +357,165 @@ if lootFolder then
         lootDropdown:SetValues(OPTIONS)
     end)
 end
+
+local CombatTab = Window:AddTab("Combat", "sword")
+local KillauraGroup = CombatTab:AddLeftGroupbox("Killaura")
+
+local killauraEnabled = false
+local killauraConnection
+local killauraRange = 20
+local teleportMode = "TweenServies"
+local cooldownValue = "0"
+local killauraRadius = 360
+local notVisual = false
+
+KillauraGroup:AddSlider("KillauraRange", {
+    Text = "Range",
+    Default = 20,
+    Min = 1,
+    Max = 1000,
+    Rounding = 0,
+    Suffix = " studs",
+    Callback = function(Value)
+        killauraRange = Value
+    end
+})
+
+KillauraGroup:AddDropdown("TeleportMode", {
+    Values = {"TweenServies", "CFrame"},
+    Default = 1,
+    Text = "Teleport Mode",
+    Callback = function(Value)
+        teleportMode = Value
+    end
+})
+
+KillauraGroup:AddInput("CooldownInput", {
+    Text = "Cooldown",
+    Default = "0",
+    Placeholder = "Enter cooldown value",
+    Callback = function(Value)
+        cooldownValue = Value
+    end
+})
+
+KillauraGroup:AddButton("Apply Cooldown", function()
+    local backpack = game.Players.LocalPlayer.Backpack
+    for _, item in pairs(backpack:GetChildren()) do
+        if item:FindFirstChild("Attributes") then
+            local attributes = item:FindFirstChild("Attributes")
+            if attributes:FindFirstChild("tooltype") then
+                local toolType = string.lower(tostring(attributes.tooltype.Value))
+                if string.find(toolType, "melee") then
+                    if attributes:FindFirstChild("Cooldown") then
+                        attributes.Cooldown.Value = tonumber(cooldownValue) or 0
+                    end
+                end
+            end
+        end
+    end
+end)
+
+KillauraGroup:AddSlider("KillauraRadius", {
+    Text = "Radius",
+    Default = 360,
+    Min = 0,
+    Max = 360,
+    Rounding = 0,
+    Suffix = "°",
+    Callback = function(Value)
+        killauraRadius = Value
+    end
+})
+
+KillauraGroup:AddToggle("NotVisual", {
+    Text = "Not Visual",
+    Default = false,
+    Callback = function(Value)
+        notVisual = Value
+    end
+})
+
+KillauraGroup:AddToggle("KillauraToggle", {
+    Text = "Killaura",
+    Default = false,
+    Callback = function(Value)
+        killauraEnabled = Value
+        if killauraEnabled then
+            killauraConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                if killauraEnabled then
+                    local character = game.Players.LocalPlayer.Character
+                    if character then
+                        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                        local tool = character:FindFirstChildOfClass("Tool")
+                        
+                        if humanoidRootPart and tool and tool:FindFirstChild("Attributes") then
+                            local attributes = tool:FindFirstChild("Attributes")
+                            if attributes:FindFirstChild("tooltype") then
+                                local toolType = string.lower(tostring(attributes.tooltype.Value))
+                                if string.find(toolType, "melee") then
+                                    local closestNPC = nil
+                                    local closestDistance = killauraRange
+                                    
+                                    for _, npc in pairs(workspace.NPCs:GetChildren()) do
+                                        if npc:FindFirstChild("HumanoidRootPart") then
+                                            local npcPos = npc.HumanoidRootPart.Position
+                                            local charPos = humanoidRootPart.Position
+                                            local distance = (charPos - npcPos).Magnitude
+                                            
+                                            if distance <= killauraRange then
+                                                if killauraRadius < 360 then
+                                                    local lookVector = humanoidRootPart.CFrame.LookVector
+                                                    local toNpcVector = (npcPos - charPos).Unit
+                                                    local dotProduct = lookVector:Dot(toNpcVector)
+                                                    local angle = math.deg(math.acos(dotProduct))
+                                                    
+                                                    if angle <= killauraRadius / 2 then
+                                                        if distance < closestDistance then
+                                                            closestNPC = npc
+                                                            closestDistance = distance
+                                                        end
+                                                    end
+                                                else
+                                                    if distance < closestDistance then
+                                                        closestNPC = npc
+                                                        closestDistance = distance
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                    
+                                    if closestNPC then
+                                        if notVisual then
+                                            mouse1click()
+                                        else
+                                            if teleportMode == "TweenServies" then
+                                                local targetPos = closestNPC.HumanoidRootPart.Position
+                                                local tweenService = game:GetService("TweenService")
+                                                local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Linear)
+                                                local tween = tweenService:Create(humanoidRootPart, tweenInfo, {
+                                                    CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0), closestNPC.HumanoidRootPart.Position)
+                                                })
+                                                tween:Play()
+                                                wait(0.2)
+                                                mouse1click()
+                                            else
+                                                humanoidRootPart.CFrame = CFrame.new(closestNPC.HumanoidRootPart.Position + Vector3.new(0, 3, 0), closestNPC.HumanoidRootPart.Position)
+                                                mouse1click()
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            if killauraConnection then
+                killauraConnection:Disconnect()
+            end
+        end
+    end
+})
