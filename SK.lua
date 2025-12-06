@@ -153,3 +153,98 @@ LeftGroup:AddToggle("Noclip", {
         end
     end
 })
+
+-- ВКЛАДКА "Killaura"
+local KillauraTab = Window:AddTab("Killaura", "target")
+
+-- Мини таб "Killaura"
+local KillauraGroup = KillauraTab:AddLeftTabbox()
+local KillauraMainTab = KillauraGroup:AddTab("Killaura")
+
+KillauraMainTab:AddSlider("KillauraRadius", {
+    Text = "Killaura Radius",
+    Default = 50,
+    Min = 1,
+    Max = 1000,
+    Rounding = 0,
+    Suffix = " studs"
+})
+
+KillauraMainTab:AddSlider("KillauraDelay", {
+    Text = "Killaura Delay",
+    Default = 0.5,
+    Min = 0.1,
+    Max = 3.0,
+    Rounding = 1,
+    Suffix = " sec"
+})
+
+KillauraMainTab:AddDropdown("TeleportChanger", {
+    Values = {"TweenService", "CFrame", "HumanoidRootPart"},
+    Default = 1,
+    Text = "Teleport Method"
+})
+
+KillauraMainTab:AddToggle("RadiusVisualer", {
+    Text = "Show Radius",
+    Default = false
+}):AddColorPicker("RadiusColor", {
+    Default = Color3.new(1, 0, 0),
+    Title = "Radius Color"
+})
+
+KillauraMainTab:AddToggle("KillauraON", {
+    Text = "Killaura ON",
+    Default = false,
+    
+    Callback = function(Value)
+        getgenv().KillauraEnabled = Value
+        
+        if Value then
+            getgenv().OriginalPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+            
+            while getgenv().KillauraEnabled do
+                task.wait(Options.KillauraDelay.Value)
+                
+                local player = game.Players.LocalPlayer
+                local character = player.Character
+                if not character then continue end
+                
+                local root = character:FindFirstChild("HumanoidRootPart")
+                if not root then continue end
+                
+                local radius = Options.KillauraRadius.Value
+                
+                for _, target in pairs(game.Players:GetPlayers()) do
+                    if target ~= player and target.Character then
+                        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+                        if targetRoot and (root.Position - targetRoot.Position).Magnitude <= radius then
+                            local method = Options.TeleportChanger.Value
+                            local originalPos = root.CFrame
+                            
+                            if method == "TweenService" then
+                                local tween = game:GetService("TweenService"):Create(root, TweenInfo.new(0.1), {CFrame = targetRoot.CFrame})
+                                tween:Play()
+                                tween.Completed:Wait()
+                            elseif method == "CFrame" then
+                                root.CFrame = targetRoot.CFrame
+                            elseif method == "HumanoidRootPart" then
+                                character:SetPrimaryPartCFrame(targetRoot.CFrame)
+                            end
+                            
+                            task.wait(0.1)
+                            
+                            if method == "TweenService" then
+                                local tween = game:GetService("TweenService"):Create(root, TweenInfo.new(0.1), {CFrame = originalPos})
+                                tween:Play()
+                                tween.Completed:Wait()
+                            else
+                                root.CFrame = originalPos
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+})
