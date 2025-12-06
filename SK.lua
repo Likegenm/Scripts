@@ -115,3 +115,41 @@ LeftGroup:AddToggle("Fly", {
         end
     end
 })
+
+LeftGroup:AddToggle("Noclip", {
+    Text = "Noclip",
+    Default = false,
+    
+    Callback = function(Value)
+        getgenv().NoclipEnabled = Value
+        local RunService = game:GetService("RunService")
+        
+        if Value then
+            getgenv().NoclipConnection = RunService.Stepped:Connect(function()
+                if getgenv().NoclipEnabled then
+                    local player = game.Players.LocalPlayer
+                    if player.Character then
+                        for _, part in pairs(player.Character:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                part.CanCollide = false
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            if getgenv().NoclipConnection then
+                getgenv().NoclipConnection:Disconnect()
+            end
+            
+            local player = game.Players.LocalPlayer
+            if player.Character then
+                for _, part in pairs(player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = true
+                    end
+                end
+            end
+        end
+    end
+})
