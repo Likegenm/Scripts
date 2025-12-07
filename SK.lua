@@ -200,7 +200,9 @@ RightGroup:AddToggle("AttachOn", {
                     end
                     
                     if nearestPart then
-                        root.CFrame = nearestPart.CFrame
+                        local tween = game:GetService("TweenService"):Create(root, TweenInfo.new(0.1), {CFrame = nearestPart.CFrame})
+                        tween:Play()
+                        tween.Completed:Wait()
                     end
                 end
             end)
