@@ -158,7 +158,7 @@ LeftGroup:AddToggle("Noclip", {
 local KillauraTab = Window:AddTab("Killaura", "target")
 
 -- Мини таб "Killaura"
-local KillauraGroup = KillauraTab:AddLeftTabbox()
+local KillauraGroup = KillauraTab:AddRightTabbox()
 local KillauraMainTab = KillauraGroup:AddTab("Killaura")
 
 KillauraMainTab:AddSlider("KillauraRadius", {
@@ -201,24 +201,37 @@ KillauraMainTab:AddToggle("KillauraON", {
         getgenv().KillauraEnabled = Value
         
         if Value then
-            getgenv().OriginalPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-            
-            while getgenv().KillauraEnabled do
-                task.wait(Options.KillauraDelay.Value)
-                
-                local player = game.Players.LocalPlayer
-                local character = player.Character
-                if not character then continue end
-                
-                local root = character:FindFirstChild("HumanoidRootPart")
-                if not root then continue end
-                
-                local radius = Options.KillauraRadius.Value
-                
-                for _, target in pairs(game.Players:GetPlayers()) do
-                    if target ~= player and target.Character then
-                        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
-                        if targetRoot and (root.Position - targetRoot.Position).Magnitude <= radius then
+            task.spawn(function()
+                while getgenv().KillauraEnabled do
+                    task.wait(Options.KillauraDelay.Value)
+                    
+                    local player = game.Players.LocalPlayer
+                    local character = player.Character
+                    if not character then continue end
+                    
+                    local root = character:FindFirstChild("HumanoidRootPart")
+                    if not root then continue end
+                    
+                    local radius = Options.KillauraRadius.Value
+                    local nearestPlayer = nil
+                    local nearestDistance = radius + 1
+                    
+                    for _, target in pairs(game.Players:GetPlayers()) do
+                        if target ~= player and target.Character then
+                            local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+                            if targetRoot then
+                                local distance = (root.Position - targetRoot.Position).Magnitude
+                                if distance <= radius and distance < nearestDistance then
+                                    nearestPlayer = target
+                                    nearestDistance = distance
+                                end
+                            end
+                        end
+                    end
+                    
+                    if nearestPlayer then
+                        local targetRoot = nearestPlayer.Character:FindFirstChild("HumanoidRootPart")
+                        if targetRoot then
                             local method = Options.TeleportChanger.Value
                             local originalPos = root.CFrame
                             
@@ -244,7 +257,7 @@ KillauraMainTab:AddToggle("KillauraON", {
                         end
                     end
                 end
-            end
+            end)
         end
     end
 })
