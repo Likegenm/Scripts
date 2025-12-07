@@ -195,7 +195,6 @@ KillauraMainTab:AddToggle("KillauraON", {
         getgenv().KillauraEnabled = Value
         
         if Value then
-            -- Создаем круг для отображения радиуса
             local radiusPart = Instance.new("Part")
             radiusPart.Name = "KillauraRadius"
             radiusPart.Anchored = true
@@ -241,7 +240,6 @@ KillauraMainTab:AddToggle("KillauraON", {
                 end
             end)
             
-            -- Логика килауры
             task.spawn(function()
                 while getgenv().KillauraEnabled do
                     task.wait(Options.KillauraDelay.Value)
@@ -281,7 +279,6 @@ KillauraMainTab:AddToggle("KillauraON", {
                 end
             end)
         else
-            -- Удаляем круг радиуса
             local radiusPart = workspace:FindFirstChild("KillauraRadius")
             if radiusPart then
                 radiusPart:Destroy()
