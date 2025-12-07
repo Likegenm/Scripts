@@ -179,13 +179,7 @@ KillauraMainTab:AddSlider("KillauraDelay", {
     Suffix = " sec"
 })
 
-KillauraMainTab:AddDropdown("TeleportChanger", {
-    Values = {"TweenService", "CFrame", "HumanoidRootPart"},
-    Default = 1,
-    Text = "Teleport Method"
-})
-
-KillauraMainTab:AddToggle("RadiusVisualer", {
+KillauraMainTab:AddToggle("ShowRadius", {
     Text = "Show Radius",
     Default = false
 }):AddColorPicker("RadiusColor", {
@@ -201,6 +195,53 @@ KillauraMainTab:AddToggle("KillauraON", {
         getgenv().KillauraEnabled = Value
         
         if Value then
+            -- Создаем круг для отображения радиуса
+            local radiusPart = Instance.new("Part")
+            radiusPart.Name = "KillauraRadius"
+            radiusPart.Anchored = true
+            radiusPart.CanCollide = false
+            radiusPart.Transparency = 0.7
+            radiusPart.Size = Vector3.new(1, 0.1, 1)
+            radiusPart.Color = Options.RadiusColor.Value
+            radiusPart.Parent = workspace
+            
+            local highlight = Instance.new("SelectionBox")
+            highlight.Adornee = radiusPart
+            highlight.LineThickness = 0.05
+            highlight.Color3 = Options.RadiusColor.Value
+            highlight.Parent = radiusPart
+            
+            task.spawn(function()
+                while getgenv().KillauraEnabled do
+                    task.wait(0.1)
+                    
+                    if Toggles.ShowRadius.Value then
+                        local player = game.Players.LocalPlayer
+                        local character = player.Character
+                        if character then
+                            local root = character:FindFirstChild("HumanoidRootPart")
+                            if root then
+                                local radius = Options.KillauraRadius.Value
+                                radiusPart.Size = Vector3.new(radius * 2, 0.1, radius * 2)
+                                radiusPart.Position = root.Position - Vector3.new(0, 3, 0)
+                                radiusPart.Color = Options.RadiusColor.Value
+                                highlight.Color3 = Options.RadiusColor.Value
+                                radiusPart.Transparency = 0.7
+                                highlight.Visible = true
+                            end
+                        end
+                    else
+                        radiusPart.Transparency = 1
+                        highlight.Visible = false
+                    end
+                end
+                
+                if radiusPart then
+                    radiusPart:Destroy()
+                end
+            end)
+            
+            -- Логика килауры
             task.spawn(function()
                 while getgenv().KillauraEnabled do
                     task.wait(Options.KillauraDelay.Value)
@@ -232,32 +273,19 @@ KillauraMainTab:AddToggle("KillauraON", {
                     if nearestPlayer then
                         local targetRoot = nearestPlayer.Character:FindFirstChild("HumanoidRootPart")
                         if targetRoot then
-                            local method = Options.TeleportChanger.Value
-                            local originalPos = root.CFrame
-                            
-                            if method == "TweenService" then
-                                local tween = game:GetService("TweenService"):Create(root, TweenInfo.new(0.1), {CFrame = targetRoot.CFrame})
-                                tween:Play()
-                                tween.Completed:Wait()
-                            elseif method == "CFrame" then
-                                root.CFrame = targetRoot.CFrame
-                            elseif method == "HumanoidRootPart" then
-                                character:SetPrimaryPartCFrame(targetRoot.CFrame)
-                            end
-                            
+                            root.CFrame = targetRoot.CFrame
                             task.wait(0.1)
-                            
-                            if method == "TweenService" then
-                                local tween = game:GetService("TweenService"):Create(root, TweenInfo.new(0.1), {CFrame = originalPos})
-                                tween:Play()
-                                tween.Completed:Wait()
-                            else
-                                root.CFrame = originalPos
-                            end
+                            root.CFrame = CFrame.new(root.Position)
                         end
                     end
                 end
             end)
+        else
+            -- Удаляем круг радиуса
+            local radiusPart = workspace:FindFirstChild("KillauraRadius")
+            if radiusPart then
+                radiusPart:Destroy()
+            end
         end
     end
 })
