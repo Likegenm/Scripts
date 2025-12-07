@@ -1,0 +1,10 @@
+local p = Instance.new("Part")
+p.Shape = Enum.PartType.Cylinder
+p.Size = Vector3.new(100000, 50, 1000000)
+p.Position = Vector3.new(150.87, -1000, 30.29)
+p.Orientation = Vector3.new(0, 0, 90)
+p.Anchored = true
+p.CanCollide = true
+p.Color = Color3.fromRGB(0, 0, 0)
+p.Transparency = 0.3
+p.Parent = workspace
