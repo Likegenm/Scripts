@@ -7,8 +7,8 @@ local player = Players.LocalPlayer
 
 -- Create GUI
 local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = player.PlayerGui
-screenGui.ReseOnSpawn = false
+screenGui.Name = "FloatGUI"
+screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 300, 0, 150)
@@ -78,12 +78,13 @@ local humanoid
 local rootPart
 local spaceHeld = false
 local holdStartTime = 0
+local floatConnection
 
 -- Settings
-local SLOW_FALL_SPEED = 3 -- 5x slower than normal fall
+local SLOW_FALL_SPEED = 3
 local MIN_JUMP_POWER = 30
 local MAX_JUMP_POWER = 100
-local HOLD_TIME_MAX = 1.0 -- Max hold time in seconds
+local HOLD_TIME_MAX = 1.0
 
 -- Get character function
 local function getCharacter()
@@ -91,7 +92,7 @@ local function getCharacter()
     if character then
         humanoid = character:FindFirstChild("Humanoid")
         rootPart = character:FindFirstChild("HumanoidRootPart")
-        return true
+        return rootPart ~= nil and humanoid ~= nil
     end
     return false
 end
@@ -99,9 +100,8 @@ end
 -- Calculate jump power based on hold time
 local function getJumpPower()
     local holdTime = tick() - holdStartTime
-    local holdPercent = math.min(holdTime / HOLD_TIME_MAX, 1.0) -- 0 to 1
+    local holdPercent = math.min(holdTime / HOLD_TIME_MAX, 1.0)
     
-    -- Calculate jump power (linear from MIN to MAX)
     local jumpPower = MIN_JUMP_POWER + (MAX_JUMP_POWER - MIN_JUMP_POWER) * holdPercent
     
     return math.floor(jumpPower)
@@ -114,7 +114,6 @@ local function performInfJump()
     
     local jumpPower = getJumpPower()
     
-    -- Jump with velocity based on hold time
     rootPart.Velocity = Vector3.new(
         rootPart.Velocity.X,
         jumpPower,
@@ -124,33 +123,30 @@ local function performInfJump()
     print("Jump power: " .. jumpPower)
 end
 
--- Main float loop
-local function floatLoop()
-    while floatEnabled do
-        if getCharacter() then
-            -- Apply slow fall (5x slower)
-            local currentVelocity = rootPart.Velocity
-            
-            -- Only slow down downward movement
-            if currentVelocity.Y < -SLOW_FALL_SPEED then
-                rootPart.Velocity = Vector3.new(
-                    currentVelocity.X,
-                    -SLOW_FALL_SPEED, -- Limited fall speed
-                    currentVelocity.Z
-                )
-            end
-        end
-        wait(0.03) -- Fast update for smooth falling
-    end
-end
-
 -- Toggle Float
 local function toggleFloat()
     floatEnabled = not floatEnabled
     
     if floatEnabled then
         -- ENABLE
-        spawn(floatLoop)
+        if floatConnection then
+            floatConnection:Disconnect()
+        end
+        
+        floatConnection = RunService.Heartbeat:Connect(function()
+            if not floatEnabled then return end
+            if not getCharacter() then return end
+            
+            local currentVelocity = rootPart.Velocity
+            
+            if currentVelocity.Y < -SLOW_FALL_SPEED then
+                rootPart.Velocity = Vector3.new(
+                    currentVelocity.X,
+                    -SLOW_FALL_SPEED,
+                    currentVelocity.Z
+                )
+            end
+        end)
         
         toggleButton.Text = "🔴 DISABLE SLOW FALL"
         toggleButton.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
@@ -159,6 +155,11 @@ local function toggleFloat()
         print("SLOW FALL ENABLED - Hold SPACE for bigger jumps")
     else
         -- DISABLE
+        if floatConnection then
+            floatConnection:Disconnect()
+            floatConnection = nil
+        end
+        
         toggleButton.Text = "🟢 ENABLE SLOW FALL"
         toggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
         statusLabel.Text = "Status: DISABLED"
@@ -174,15 +175,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.Space and floatEnabled then
         spaceHeld = true
         holdStartTime = tick()
-        
-        -- Start showing hold power
-        spawn(function()
-            while spaceHeld and floatEnabled do
-                local power = getJumpPower()
-                infoLabel.Text = "Hold SPACE: " .. power .. " power"
-                wait(0.1)
-            end
-        end)
     end
     
     if input.KeyCode == Enum.KeyCode.X then
@@ -194,14 +186,21 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.Space and spaceHeld and floatEnabled then
         spaceHeld = false
         performInfJump()
-        infoLabel.Text = "X: Toggle | SPACE: Hold for bigger jump"
     end
 end)
 
 -- Auto character update
 player.CharacterAdded:Connect(function()
     if floatEnabled then
-        wait(1) -- Wait for character to load
+        wait(0.5)
+        if floatConnection then
+            floatConnection:Disconnect()
+            floatConnection = nil
+        end
+        floatEnabled = false
+        toggleButton.Text = "🟢 ENABLE SLOW FALL"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        statusLabel.Text = "Status: DISABLED"
     end
 end)
 
