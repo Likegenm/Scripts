@@ -157,43 +157,57 @@ LeftGroup:AddToggle("Noclip", {
 -- Правая группа "Attach"
 local RightGroup = MainTab:AddRightGroupbox("Attach")
 
-RightGroup:AddInput("AttachRadius(80% UNC+)", {
+RightGroup:AddInput("AttachRadiusInput", {
     Default = "50",
     Numeric = true,
     Finished = false,
     Text = "Attach Radius",
-    Placeholder = "Radius:",
+    Placeholder = "Введите радиус",
+})
+
+RightGroup:AddToggle("AutoAttachToggle", {
+    Text = "Auto Attach",
+    Default = false,
     
     Callback = function(Value)
-        if Value and tonumber(Value) then
-            local radius = tonumber(Value)
-            local player = game.Players.LocalPlayer
-            local character = player.Character
-            if not character then return end
-            
-            local root = character:FindFirstChild("HumanoidRootPart")
-            if not root then return end
-            
-            local nearestPlayer = nil
-            local nearestDistance = radius + 1
-            
-            for _, target in pairs(game.Players:GetPlayers()) do
-                if target ~= player and target.Character then
-                    local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
-                    if targetRoot then
-                        local distance = (root.Position - targetRoot.Position).Magnitude
-                        if distance <= radius and distance < nearestDistance then
-                            nearestPlayer = target
-                            nearestDistance = distance
+        getgenv().AutoAttachEnabled = Value
+        
+        if Value then
+            while getgenv().AutoAttachEnabled do
+                task.wait(0.1)
+                
+                local inputValue = Options.AttachRadiusInput.Value
+                if inputValue and tonumber(inputValue) then
+                    local radius = tonumber(inputValue)
+                    local player = game.Players.LocalPlayer
+                    local character = player.Character
+                    if not character then continue end
+                    
+                    local root = character:FindFirstChild("HumanoidRootPart")
+                    if not root then continue end
+                    
+                    local nearestPlayer = nil
+                    local nearestDistance = radius + 1
+                    
+                    for _, target in pairs(game.Players:GetPlayers()) do
+                        if target ~= player and target.Character then
+                            local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+                            if targetRoot then
+                                local distance = (root.Position - targetRoot.Position).Magnitude
+                                if distance <= radius and distance < nearestDistance then
+                                    nearestPlayer = target
+                                    nearestDistance = distance
+                                end
+                            end
                         end
                     end
-                end
-            end
-            
-            if nearestPlayer then
-                local targetRoot = nearestPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if targetRoot then
-                    root.CFrame = targetRoot.CFrame
+                    
+                    if nearestPlayer then
+                        local targetRoot = nearestPlayer.Character:FindFirstChild("HumanoidRootPart")
+                        if targetRoot then
+                            root.CFrame = targetRoot.CFrame
+                        end
+                    end
                 end
             end
         end
