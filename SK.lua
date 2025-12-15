@@ -199,3 +199,72 @@ RightGroup:AddInput("AttachRadiusInput", {
         end
     end
 })
+
+local Killaura = PlayerTab:AddLeftGroupbox("Killaura")
+
+Killaura:AddInput("KillauraRange", {
+    Default = "50",
+    Numeric = true,
+    Finished = false,
+    Text = "Killaura Range",
+    Placeholder = "Введите радиус",
+})
+
+Killaura:AddToggle("KillauraActive", {
+    Text = "Killaura Active",
+    Default = false,
+    
+    Callback = function(Value)
+        getgenv().KillauraActive = Value
+        
+        if Value then
+            local UserInputService = game:GetService("UserInputService")
+            
+            getgenv().KillauraConnection = UserInputService.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    local inputValue = Options.KillauraRange.Value
+                    if inputValue and tonumber(inputValue) then
+                        local radius = tonumber(inputValue)
+                        local player = game.Players.LocalPlayer
+                        local character = player.Character
+                        if not character then return end
+                        
+                        local root = character:FindFirstChild("HumanoidRootPart")
+                        if not root then return end
+                        
+                        local savedPosition = root.CFrame
+                        local nearestPlayer = nil
+                        local nearestDistance = radius + 1
+                        
+                        for _, target in pairs(game.Players:GetPlayers()) do
+                            if target ~= player and target.Character then
+                                local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+                                if targetRoot then
+                                    local distance = (root.Position - targetRoot.Position).Magnitude
+                                    if distance <= radius and distance < nearestDistance then
+                                        nearestPlayer = target
+                                        nearestDistance = distance
+                                    end
+                                end
+                            end
+                        end
+                        
+                        if nearestPlayer then
+                            local targetRoot = nearestPlayer.Character:FindFirstChild("HumanoidRootPart")
+                            if targetRoot then
+                                root.CFrame = targetRoot.CFrame
+                                task.wait(0.5)
+                                root.CFrame = savedPosition
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            if getgenv().KillauraConnection then
+                getgenv().KillauraConnection:Disconnect()
+            end
+        end
+    end
+})
+
