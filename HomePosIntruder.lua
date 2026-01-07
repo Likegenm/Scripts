@@ -137,15 +137,20 @@ RunService.RenderStepped:Connect(function()
 end)
 
 local function updateValue()
-    local intruderPos = game.workspace.Values.intruderPos.Value
-    if intruderPos then
-        subtitle.Text = tostring(intruderPos)
+    local success, result = pcall(function()
+        return game.workspace.Values.intruderPos.Value
+    end)
+    
+    if success and result then
+        subtitle.Text = tostring(result)
     else
-        subtitle.Text = "Not Found"
+        subtitle.Text = "Error"
     end
 end
 
-while true do
-    updateValue()
-    task.wait(1)
-end
+task.spawn(function()
+    while true do
+        updateValue()
+        task.wait(1)
+    end
+end)
