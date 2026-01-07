@@ -35,7 +35,7 @@ title.Parent = frame
 
 local subtitle = Instance.new("TextLabel")
 subtitle.Name = "ValueLabel"
-subtitle.Text = "Ready"
+subtitle.Text = "Waiting..."
 subtitle.Size = UDim2.new(1, 0, 0.5, 0)
 subtitle.Position = UDim2.new(0, 0, 0.5, 0)
 subtitle.ZIndex = 2147483647
@@ -50,6 +50,11 @@ frameStroke.Color = Color3.new(1, 1, 1)
 frameStroke.Thickness = 3
 frameStroke.Transparency = 0.5
 frameStroke.Parent = frame
+
+RunService.Heartbeat:Connect(function()
+    local value = game.workspace.Values.intruderPos.Value
+    subtitle.Text = tostring(value)
+end)
 
 local isDragging = false
 local dragOffset = Vector2.new(0, 0)
