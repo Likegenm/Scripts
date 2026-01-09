@@ -1,7 +1,3 @@
-local p1 = game.workspace.Values.intruderpos1
-local p2 = game.workspace.Values.intruderPos2
-local p3 = p1 .."and" ..p2
-
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -56,8 +52,21 @@ frameStroke.Transparency = 0.5
 frameStroke.Parent = frame
 
 RunService.Heartbeat:Connect(function()
-    local value = p3
-    subtitle.Text = tostring(value)
+    local p1 = game.Workspace:FindFirstChild("Values")
+    if p1 then
+        local intruderpos1 = p1:FindFirstChild("intruderpos1")
+        local intruderPos2 = p1:FindFirstChild("intruderPos2")
+        
+        if intruderpos1 and intruderPos2 then
+            local value1 = intruderpos1.Value
+            local value2 = intruderPos2.Value
+            subtitle.Text = tostring(value1) .. " and " .. tostring(value2)
+        else
+            subtitle.Text = "Values not found"
+        end
+    else
+        subtitle.Text = "Folder 'Values' not found"
+    end
 end)
 
 local isDragging = false
@@ -72,15 +81,15 @@ frame.InputBegan:Connect(function(input)
     end
 end)
 
-frame.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        isDragging = false
+UserInputService.InputChanged:Connect(function(input)
+    if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local mousePos = input.Position
+        frame.Position = UDim2.new(0, mousePos.X + dragOffset.X, 0, mousePos.Y + dragOffset.Y)
     end
 end)
 
-RunService.RenderStepped:Connect(function()
-    if isDragging then
-        local mousePos = UserInputService:GetMouseLocation()
-        frame.Position = UDim2.new(0, mousePos.X + dragOffset.X, 0, mousePos.Y + dragOffset.Y)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        isDragging = false
     end
 end)
