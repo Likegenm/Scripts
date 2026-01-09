@@ -35,7 +35,7 @@ title.Parent = frame
 
 local subtitle = Instance.new("TextLabel")
 subtitle.Name = "ValueLabel"
-subtitle.Text = "Waiting..."
+subtitle.Text = "Loading..."
 subtitle.Size = UDim2.new(1, 0, 0.5, 0)
 subtitle.Position = UDim2.new(0, 0, 0.5, 0)
 subtitle.ZIndex = 2147483647
@@ -51,22 +51,25 @@ frameStroke.Thickness = 3
 frameStroke.Transparency = 0.5
 frameStroke.Parent = frame
 
-RunService.Heartbeat:Connect(function()
-    local p1 = game.Workspace:FindFirstChild("Values")
-    if p1 then
-        local intruderpos1 = p1:FindFirstChild("intruderpos1")
-        local intruderPos2 = p1:FindFirstChild("intruderPos2")
-        
-        if intruderpos1 and intruderPos2 then
-            local value1 = intruderpos1.Value
-            local value2 = intruderPos2.Value
-            subtitle.Text = tostring(value1) .. " and " .. tostring(value2)
-        else
-            subtitle.Text = "Values not found"
-        end
+local function updateValues()
+    local p1 = game.Workspace.Values.intruderPos1
+    local p2 = game.Workspace.Values.intruderPos2
+    
+    if p1 and p2 then
+        local value1 = p1.Value
+        local value2 = p2.Value
+        subtitle.Text = tostring(value1) .. " and " .. tostring(value2)
     else
-        subtitle.Text = "Folder 'Values' not found"
+        if not p1 then
+            subtitle.Text = "intruderpos1 not found"
+        elseif not p2 then
+            subtitle.Text = "intruderPos2 not found"
+        end
     end
+end
+
+RunService.Heartbeat:Connect(function()
+    pcall(updateValues)
 end)
 
 local isDragging = false
