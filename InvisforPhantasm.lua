@@ -39,7 +39,7 @@ closeButton.TextSize = 18
 
 signatureLabel.Size = UDim2.new(0, 100, 0, 10)
 signatureLabel.Position = UDim2.new(0, 0, 0.9, 0)
-signatureLabel.Text = "by aarboyess!"
+signatureLabel.Text = "by Likegenm!"
 signatureLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 signatureLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 signatureLabel.Font = Enum.Font.RobotoMono
