@@ -78,39 +78,44 @@ local function teleportToInvisLocation()
 end
 
 local function toggleInvisibility()
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then
+        return
+    end
+    
     invis_on = not invis_on
     sound:Play()
-    
+
     if invis_on then
-        local savedpos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-        
-        wait()
-        
+        local savedpos = character.HumanoidRootPart.CFrame
+
+        task.wait()
+
         teleportToInvisLocation()
-        
-        wait(0.15)
-        
+
+        task.wait(0.15)
+
         local Seat = Instance.new('Seat', game.Workspace)
         Seat.Anchored = false
         Seat.CanCollide = false
         Seat.Name = 'invischair'
         Seat.Transparency = 1
         Seat.Position = Vector3.new(invisX, invisY, invisZ)
-        
+
         local Weld = Instance.new("Weld", Seat)
-        local torso = game.Players.LocalPlayer.Character:FindFirstChild("Torso") or 
-                      game.Players.LocalPlayer.Character:FindFirstChild("UpperTorso")
+        local torso = character:FindFirstChild("Torso") or 
+                      character:FindFirstChild("UpperTorso")
         if torso then
             Weld.Part0 = Seat
             Weld.Part1 = torso
         end
-        
-        wait()
-        
+
+        task.wait()
+
         Seat.CFrame = savedpos
-        
-        setTransparency(game.Players.LocalPlayer.Character, 0.5)
-        
+
+        setTransparency(character, 0.5)
+
         game.StarterGui:SetCore("SendNotification", {
             Title = "turned on invis!",
             Duration = 3,
@@ -121,7 +126,7 @@ local function toggleInvisibility()
         if invisChair then
             invisChair:Destroy()
         end
-        setTransparency(game.Players.LocalPlayer.Character, 0)
+        setTransparency(character, 0)
         game.StarterGui:SetCore("SendNotification", {
             Title = "turned off invis!",
             Duration = 3,
