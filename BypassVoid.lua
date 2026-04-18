@@ -10,14 +10,20 @@ p.Color = Color3.new(0, 0, 0)
 p.Transparency = 0.7
 p.CanCollide = true
 
-game:GetService("RunService").Heartbeat:Connect(function()
+while true do
     local char = game.Players.LocalPlayer.Character
     local hum = char and char:FindFirstChild("Humanoid")
-    if hum and hum.Health <= 0 then
-        hum.Health = hum.MaxHealth
+    
+    if hum then
+        if hum.Health <= 0 then
+            hum.Health = hum.MaxHealth
+        end
     end
+
     if char and char.PrimaryPart then
         local rootPos = char.PrimaryPart.Position
         p.Position = Vector3.new(rootPos.X, -5000, rootPos.Z)
     end
-end)
+    
+    task.wait(0.0000001)
+end
